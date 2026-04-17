@@ -57,24 +57,19 @@ select,input{padding:10px;border-radius:10px;border:none;}
 <!-- MATCHES -->
 <div id="matches" style="display:none">
 <div class="card">
-
 <button onclick="setMode('today')">Today</button>
 <button onclick="setMode('tomorrow')">Tomorrow</button>
 <button onclick="setMode('live')">Live</button>
-
 <br><br>
 
 <select id="league">
-<option value="all">All Leagues</option>
+<option value="all">All</option>
 <option value="39">EPL</option>
 <option value="140">La Liga</option>
-<option value="78">Bundesliga</option>
-<option value="135">Serie A</option>
 </select>
 
 <br><br>
 <button onclick="loadMatches()">Load Matches</button>
-
 </div>
 
 <div id="results"></div>
@@ -89,44 +84,59 @@ select,input{padding:10px;border-radius:10px;border:none;}
 </div>
 
 <div id="vipArea" style="display:none">
-<div class="card">
 <button onclick="openVIP()">🚀 Enter VIP</button>
-</div>
 </div>
 </div>
 
 <!-- VIP PAGE -->
 <div id="vipPage" style="display:none">
-<div class="nav">
-<button onclick="loadVIPMatches()">🔥 VIP Picks</button>
-<button onclick="exitVIP()">🚪 Exit</button>
-</div>
-<h2>👑 VIP STRONG PICKS</h2>
+<h2>👑 VIP PICKS</h2>
+<button onclick="loadVIPMatches()">Generate VIP</button>
 <div id="vipResults"></div>
 </div>
 
 <!-- ADMIN -->
 <div id="admin" style="display:none">
 <div class="card">
-<h3>Generate VIP Code</h3>
-
 <select id="days">
 <option value="1">1 Day</option>
 <option value="7">1 Week</option>
 <option value="30">1 Month</option>
 </select>
-
 <br><br>
-<button onclick="genCode()">Generate</button>
-
+<button onclick="genCode()">Generate Code</button>
 <p id="codeOut"></p>
 </div>
 </div>
 
 <script>
 
-const API_KEY="YOUR_API_KEY_HERE";
-let mode="today";
+const API_KEY="8a5b484376f53b6d1d4f6f2b8582f18c";
+
+// LIMIT SYSTEM
+function canGenerate(type){
+let user=localStorage.getItem("currentUser");
+if(!user) return false;
+
+let key=type+"_"+user;
+
+let data=JSON.parse(localStorage.getItem(key))||{count:0,time:Date.now()};
+
+if(Date.now()-data.time>86400000){
+data={count:0,time:Date.now()};
+}
+
+let limit=(type==="vip")?10:5;
+
+if(data.count>=limit){
+alert("Limit imefika, jaribu baada ya masaa 24");
+return false;
+}
+
+data.count++;
+localStorage.setItem(key,JSON.stringify(data));
+return true;
+}
 
 // NAV
 function show(x){
@@ -136,34 +146,26 @@ document.getElementById(i).style.display="none";
 document.getElementById(x).style.display="block";
 }
 
-// REGISTER
+// LOGIN
 function register(){
-let email=emailInput().value;
-let pass=passInput().value;
-if(!email||!pass)return alert("Weka email na password");
-localStorage.setItem(email,pass);
+localStorage.setItem(email.value,pass.value);
 alert("Registered");
 }
 
-// LOGIN
 function loginUser(){
-let email=emailInput().value;
-let pass=passInput().value;
-if(localStorage.getItem(email)===pass){
-localStorage.setItem("currentUser",email);
-document.getElementById("login").style.display="none";
+if(localStorage.getItem(email.value)===pass.value){
+localStorage.setItem("currentUser",email.value);
+login.style.display="none";
 show("home");
-welcome.innerText="Welcome "+email;
-}else alert("Wrong login");
+welcome.innerText="Welcome "+email.value;
+}else alert("Wrong");
 }
 
-function emailInput(){return document.getElementById("email")}
-function passInput(){return document.getElementById("pass")}
+function logout(){
+localStorage.removeItem("currentUser");
+location.reload();
+}
 
-// LOGOUT
-function logout(){localStorage.removeItem("currentUser");location.reload();}
-
-// AUTO LOGIN
 window.onload=function(){
 let u=localStorage.getItem("currentUser");
 if(u){
@@ -178,82 +180,26 @@ vipArea.style.display="block";
 }
 }
 
-// MODE
-function setMode(m){mode=m;}
-
-// DATE
-function getDate(o=0){
-let d=new Date();
-d.setDate(d.getDate()+o);
-return d.toLocaleDateString('en-CA');
-}
-
-// AI SIMPLE
-function getPrediction(){
-return ["Over 2.5","GG","Home Win"][Math.floor(Math.random()*3)];
-}
-function getConfidence(){
-return Math.floor(Math.random()*20)+70;
-}
-
 // MATCHES
 async function loadMatches(){
+if(!canGenerate("free")) return;
+
 results.innerHTML="Loading...";
-let url=`https://v3.football.api-sports.io/fixtures?date=${getDate(0)}`;
-let res=await fetch(url,{headers:{"x-apisports-key":API_KEY}});
+
+let res=await fetch(`https://v3.football.api-sports.io/fixtures?next=10`,{
+headers:{"x-apisports-key":API_KEY}
+});
 let data=await res.json();
 
 let out="";
 data.response.forEach(g=>{
-let tip=getPrediction();
-let conf=getConfidence();
-let d=g.fixture.date.split("T")[0];
-let t=g.fixture.date.split("T")[1].slice(0,5);
-
 out+=`<div class="match">
 <h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
 <p>${g.league.name}</p>
-<p>${d} ${t}</p>
-<p>${tip}</p>
-<p>${conf}%</p>
-</div>`;
-});
-results.innerHTML=out||"No matches";
-}
-
-// VIP MATCHES
-async function loadVIPMatches(){
-let u=localStorage.getItem("currentUser");
-let vip=localStorage.getItem("vip_"+u);
-
-if(!vip || Date.now()>vip) return alert("VIP expired");
-
-vipResults.innerHTML="Loading...";
-
-let res=await fetch(`https://v3.football.api-sports.io/fixtures?date=${getDate(0)}`,{
-headers:{"x-apisports-key":API_KEY}
-});
-
-let data=await res.json();
-
-let out="";
-data.response.slice(0,4).forEach(g=>{
-let tip=["1X","GG","Over 1.5"][Math.floor(Math.random()*3)];
-let conf=Math.floor(Math.random()*5)+90;
-
-let d=g.fixture.date.split("T")[0];
-let t=g.fixture.date.split("T")[1].slice(0,5);
-
-out+=`<div class="match">
-<h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
-<p>${g.league.name}</p>
-<p>${d} ${t}</p>
-<p>${tip}</p>
-<p>${conf}%</p>
 </div>`;
 });
 
-vipResults.innerHTML=out;
+results.innerHTML=out;
 }
 
 // VIP
@@ -266,20 +212,40 @@ if(exp && Date.now()<exp){
 localStorage.setItem("vip_"+u,exp);
 vipArea.style.display="block";
 alert("VIP Active");
-}else alert("Invalid code");
+}else alert("Invalid");
 }
 
-function openVIP(){show("vipPage")}
-function exitVIP(){show("home")}
+function openVIP(){show("vipPage");}
+
+// VIP MATCHES
+async function loadVIPMatches(){
+if(!canGenerate("vip")) return;
+
+vipResults.innerHTML="Loading...";
+
+let res=await fetch(`https://v3.football.api-sports.io/fixtures?next=10`,{
+headers:{"x-apisports-key":API_KEY}
+});
+let data=await res.json();
+
+let out="";
+data.response.slice(0,5).forEach(g=>{
+out+=`<div class="match">
+<h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
+<p>🔥 Strong Pick</p>
+</div>`;
+});
+
+vipResults.innerHTML=out;
+}
 
 // ADMIN
 function genCode(){
 let code="VIP"+Math.floor(Math.random()*999999);
-let days=parseInt(document.getElementById("days").value);
+let days=parseInt(days.value);
 let exp=Date.now()+days*86400000;
-
 localStorage.setItem(code,exp);
-document.getElementById("codeOut").innerText=code;
+codeOut.innerText=code;
 }
 
 // SECRET ADMIN
@@ -297,4 +263,4 @@ setTimeout(()=>taps=0,2000);
 </script>
 
 </body>
-    </html>
+</html>
