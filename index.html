@@ -6,42 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#0a1a2f;
-    color:white;
-    text-align:center;
-}
-.nav{
-    background:#08121f;
-    padding:10px;
-}
-button{
-    padding:10px;
-    border:none;
-    border-radius:10px;
-    margin:5px;
-    background:#00c2ff;
-    color:white;
-}
-.card{
-    background:#1c2f45;
-    margin:15px;
-    padding:15px;
-    border-radius:15px;
-}
-.match{
-    background:#233a55;
-    margin:10px;
-    padding:15px;
-    border-radius:10px;
-}
-select,input{
-    padding:10px;
-    border-radius:10px;
-    border:none;
-}
+body{margin:0;font-family:Arial;background:#0a1a2f;color:white;text-align:center;}
+.nav{background:#08121f;padding:10px;}
+button{padding:10px;border:none;border-radius:10px;margin:5px;background:#00c2ff;color:white;}
+.card{background:#1c2f45;margin:15px;padding:15px;border-radius:15px;}
+.match{background:#233a55;margin:10px;padding:15px;border-radius:10px;}
+select,input{padding:10px;border-radius:10px;border:none;}
 </style>
 </head>
 
@@ -75,10 +45,10 @@ select,input{
 
 <div class="card">
 <h3>💰 Payment & Help</h3>
-<p>Lipa Mix jina SALEHE MGONJA: <b>0702289410</b></p>
+<p>Lipa Mix: <b>0702289410 (SALEHE MGONJA)</b></p>
 <p>Tuma Screenshot: <b>0757453979</b></p>
 
-<a href="https://wa.me/2556277753937" target="_blank">
+<a href="https://wa.me/255757453979" target="_blank">
 <button>📲 WhatsApp</button>
 </a>
 </div>
@@ -86,7 +56,6 @@ select,input{
 
 <!-- MATCHES -->
 <div id="matches" style="display:none">
-
 <div class="card">
 
 <button onclick="setMode('today')">Today</button>
@@ -104,13 +73,11 @@ select,input{
 </select>
 
 <br><br>
-
 <button onclick="loadMatches()">Load Matches</button>
 
 </div>
 
 <div id="results"></div>
-
 </div>
 
 <!-- VIP -->
@@ -130,16 +97,12 @@ select,input{
 
 <!-- VIP PAGE -->
 <div id="vipPage" style="display:none">
-
 <div class="nav">
 <button onclick="loadVIPMatches()">🔥 VIP Picks</button>
 <button onclick="exitVIP()">🚪 Exit</button>
 </div>
-
 <h2>👑 VIP STRONG PICKS</h2>
-
 <div id="vipResults"></div>
-
 </div>
 
 <!-- ADMIN -->
@@ -162,7 +125,7 @@ select,input{
 
 <script>
 
-const API_KEY="8a5b484376f53b6d1d4f6f2b8582f18c";
+const API_KEY="YOUR_API_KEY_HERE";
 let mode="today";
 
 // NAV
@@ -175,133 +138,97 @@ document.getElementById(x).style.display="block";
 
 // REGISTER
 function register(){
-let email=document.getElementById("email").value;
-let pass=document.getElementById("pass").value;
-
-if(!email || !pass){
-alert("Weka email na password");
-return;
-}
-
+let email=emailInput().value;
+let pass=passInput().value;
+if(!email||!pass)return alert("Weka email na password");
 localStorage.setItem(email,pass);
-alert("Registered successfully");
+alert("Registered");
 }
 
 // LOGIN
 function loginUser(){
-let email=document.getElementById("email").value;
-let pass=document.getElementById("pass").value;
-
+let email=emailInput().value;
+let pass=passInput().value;
 if(localStorage.getItem(email)===pass){
 localStorage.setItem("currentUser",email);
-
 document.getElementById("login").style.display="none";
 show("home");
-
-document.getElementById("welcome").innerText="Welcome "+email;
-
-}else{
-alert("Wrong login");
+welcome.innerText="Welcome "+email;
+}else alert("Wrong login");
 }
-}
+
+function emailInput(){return document.getElementById("email")}
+function passInput(){return document.getElementById("pass")}
 
 // LOGOUT
-function logout(){
-localStorage.removeItem("currentUser");
-location.reload();
-}
+function logout(){localStorage.removeItem("currentUser");location.reload();}
 
 // AUTO LOGIN
 window.onload=function(){
 let u=localStorage.getItem("currentUser");
-
 if(u){
-document.getElementById("login").style.display="none";
+login.style.display="none";
 show("home");
-document.getElementById("welcome").innerText="Welcome "+u;
+welcome.innerText="Welcome "+u;
 
 let vip=localStorage.getItem("vip_"+u);
 if(vip && Date.now()<vip){
-document.getElementById("vipArea").style.display="block";
+vipArea.style.display="block";
 }
 }
 }
 
 // MODE
-function setMode(m){
-mode=m;
-}
+function setMode(m){mode=m;}
 
 // DATE
-function getDate(offset=0){
+function getDate(o=0){
 let d=new Date();
-d.setDate(d.getDate()+offset);
+d.setDate(d.getDate()+o);
 return d.toLocaleDateString('en-CA');
 }
 
-// AI
+// AI SIMPLE
 function getPrediction(){
 return ["Over 2.5","GG","Home Win"][Math.floor(Math.random()*3)];
 }
-
 function getConfidence(){
-return Math.floor(Math.random()*15)+70;
+return Math.floor(Math.random()*20)+70;
 }
 
 // MATCHES
 async function loadMatches(){
-
-results.innerHTML="⏳ Loading...";
-
-let url="";
-if(mode==="today") url=`https://v3.football.api-sports.io/fixtures?date=${getDate(0)}`;
-if(mode==="tomorrow") url=`https://v3.football.api-sports.io/fixtures?date=${getDate(1)}`;
-if(mode==="live") url=`https://v3.football.api-sports.io/fixtures?live=all`;
-
+results.innerHTML="Loading...";
+let url=`https://v3.football.api-sports.io/fixtures?date=${getDate(0)}`;
 let res=await fetch(url,{headers:{"x-apisports-key":API_KEY}});
 let data=await res.json();
 
-let league=document.getElementById("league").value;
-
 let out="";
-
 data.response.forEach(g=>{
-
-if(league!="all" && g.league.id!=league) return;
-
-let date=g.fixture.date.split("T")[0];
-let time=g.fixture.date.split("T")[1].slice(0,5);
-
 let tip=getPrediction();
 let conf=getConfidence();
+let d=g.fixture.date.split("T")[0];
+let t=g.fixture.date.split("T")[1].slice(0,5);
 
-out+=`
-<div class="match">
+out+=`<div class="match">
 <h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
-<p>🏆 ${g.league.name}</p>
-<p>📅 ${date}</p>
-<p>⏰ ${time}</p>
-<p>📊 Tip: ${tip}</p>
-<p>🎯 Accuracy: ${conf}%</p>
-</div>
-`;
+<p>${g.league.name}</p>
+<p>${d} ${t}</p>
+<p>${tip}</p>
+<p>${conf}%</p>
+</div>`;
 });
-
-results.innerHTML=out || "No matches";
+results.innerHTML=out||"No matches";
 }
 
-// VIP MATCHES (FINAL STRUCTURE)
+// VIP MATCHES
 async function loadVIPMatches(){
-
 let u=localStorage.getItem("currentUser");
 let vip=localStorage.getItem("vip_"+u);
 
-if(!vip || Date.now()>vip){
-alert("VIP expired");
-return;
-}
+if(!vip || Date.now()>vip) return alert("VIP expired");
 
-vipResults.innerHTML="⏳ Loading...";
+vipResults.innerHTML="Loading...";
 
 let res=await fetch(`https://v3.football.api-sports.io/fixtures?date=${getDate(0)}`,{
 headers:{"x-apisports-key":API_KEY}
@@ -309,41 +236,27 @@ headers:{"x-apisports-key":API_KEY}
 
 let data=await res.json();
 
-let tips=[
-"Over 1.5 Goals",
-"Double Chance 1X",
-"GG (Yes)",
-"Home Team Over 1.5"
-];
-
-let matches=data.response.sort(()=>0.5-Math.random()).slice(0,4);
-
 let out="";
+data.response.slice(0,4).forEach(g=>{
+let tip=["1X","GG","Over 1.5"][Math.floor(Math.random()*3)];
+let conf=Math.floor(Math.random()*5)+90;
 
-matches.forEach(g=>{
+let d=g.fixture.date.split("T")[0];
+let t=g.fixture.date.split("T")[1].slice(0,5);
 
-let date=g.fixture.date.split("T")[0];
-let time=g.fixture.date.split("T")[1].slice(0,5);
-
-let tip=tips[Math.floor(Math.random()*tips.length)];
-let conf=Math.floor(Math.random()*5)+92;
-
-out+=`
-<div class="match">
+out+=`<div class="match">
 <h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
-<p>🏆 ${g.league.name}</p>
-<p>📅 ${date}</p>
-<p>⏰ ${time}</p>
-<p>🔥 Tip: ${tip}</p>
-<p>🎯 Accuracy: ${conf}%</p>
-</div>
-`;
+<p>${g.league.name}</p>
+<p>${d} ${t}</p>
+<p>${tip}</p>
+<p>${conf}%</p>
+</div>`;
 });
 
 vipResults.innerHTML=out;
 }
 
-// VIP CONTROL
+// VIP
 function activateVIP(){
 let code=vipCode.value;
 let exp=localStorage.getItem(code);
@@ -352,25 +265,21 @@ let u=localStorage.getItem("currentUser");
 if(exp && Date.now()<exp){
 localStorage.setItem("vip_"+u,exp);
 vipArea.style.display="block";
-alert("VIP Activated");
-}else alert("Invalid");
+alert("VIP Active");
+}else alert("Invalid code");
 }
 
-function openVIP(){
-show("vipPage");
-}
-
-function exitVIP(){
-show("home");
-}
+function openVIP(){show("vipPage")}
+function exitVIP(){show("home")}
 
 // ADMIN
 function genCode(){
-let code="VIP"+Math.floor(Math.random()*99999);
-let days=days.value;
+let code="VIP"+Math.floor(Math.random()*999999);
+let days=parseInt(document.getElementById("days").value);
 let exp=Date.now()+days*86400000;
+
 localStorage.setItem(code,exp);
-codeOut.innerText=code;
+document.getElementById("codeOut").innerText=code;
 }
 
 // SECRET ADMIN
@@ -388,4 +297,4 @@ setTimeout(()=>taps=0,2000);
 </script>
 
 </body>
-</html>
+    </html>
