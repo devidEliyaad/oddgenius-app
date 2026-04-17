@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OddGenius PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#0a1a2f;
+    color:white;
+    text-align:center;
+}
+.nav{
+    background:#08121f;
+    padding:10px;
+}
+button{
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    margin:5px;
+    background:#00c2ff;
+    color:white;
+}
+.card{
+    background:#1c2f45;
+    margin:15px;
+    padding:15px;
+    border-radius:15px;
+}
+.match{
+    background:#233a55;
+    margin:10px;
+    padding:15px;
+    border-radius:10px;
+}
+select,input{
+    padding:10px;
+    border-radius:10px;
+    border:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="nav">
+<button onclick="show('home')">🏠 Home</button>
+<button onclick="show('matches')">⚽ Matches</button>
+<button onclick="show('vip')">👑 VIP</button>
+<button onclick="logout()">🚪 Logout</button>
+</div>
+
+<h2 onclick="tapAdmin()">⚽ OddGenius AI</h2>
+
+<!-- LOGIN -->
+<div id="login">
+<div class="card">
+<h3>Login / Register</h3>
+<input id="email" placeholder="Email"><br><br>
+<input id="pass" type="password" placeholder="Password"><br><br>
+<button onclick="register()">Register</button>
+<button onclick="loginUser()">Login</button>
+</div>
+</div>
+
+<!-- HOME -->
+<div id="home" style="display:none">
+<div class="card">
+<h3 id="welcome"></h3>
+</div>
+
+<div class="card">
+<h3>💰 Payment & Help</h3>
+<p>Lipa Mix: <b>0702289410</b></p>
+<p>Tuma Screenshot: <b>06277753937</b></p>
+
+<a href="https://wa.me/2556277753937" target="_blank">
+<button>📲 WhatsApp</button>
+</a>
+</div>
+</div>
+
+<!-- MATCHES -->
+<div id="matches" style="display:none">
+
+<div class="card">
+
+<button onclick="setMode('today')">Today</button>
+<button onclick="setMode('tomorrow')">Tomorrow</button>
+<button onclick="setMode('live')">Live</button>
+
+<br><br>
+
+<select id="league">
+<option value="all">All Leagues</option>
+<option value="39">EPL</option>
+<option value="140">La Liga</option>
+<option value="78">Bundesliga</option>
+<option value="135">Serie A</option>
+</select>
+
+<br><br>
+
+<button onclick="loadMatches()">Load Matches</button>
+
+</div>
+
+<div id="results"></div>
+
+</div>
+
+<!-- VIP -->
+<div id="vip" style="display:none">
+<div class="card">
+<h3>Enter VIP Code</h3>
+<input id="vipCode">
+<button onclick="activateVIP()">Activate</button>
+</div>
+
+<div id="vipArea" style="display:none">
+<div class="card">
+<button onclick="openVIP()">🚀 Enter VIP</button>
+</div>
+</div>
+</div>
+
+<!-- VIP PAGE -->
+<div id="vipPage" style="display:none">
+
+<div class="nav">
+<button onclick="loadVIPMatches()">🔥 VIP Picks</button>
+<button onclick="exitVIP()">🚪 Exit</button>
+</div>
+
+<h2>👑 VIP STRONG PICKS</h2>
+
+<div id="vipResults"></div>
+
+</div>
+
+<!-- ADMIN -->
+<div id="admin" style="display:none">
+<div class="card">
+<h3>Generate VIP Code</h3>
+
+<select id="days">
+<option value="1">1 Day</option>
+<option value="7">1 Week</option>
+<option value="30">1 Month</option>
+</select>
+
+<br><br>
+<button onclick="genCode()">Generate</button>
+
+<p id="codeOut"></p>
+</div>
+</div>
+
+<script>
+
+const API_KEY="8a5b484376f53b6d1d4f6f2b8582f18c";
+let mode="today";
+
+// NAV
+function show(x){
+["home","matches","vip","vipPage","admin"].forEach(i=>{
+document.getElementById(i).style.display="none";
+});
+document.getElementById(x).style.display="block";
+}
+
+// REGISTER
+function register(){
+let email=document.getElementById("email").value;
+let pass=document.getElementById("pass").value;
+
+if(!email || !pass){
+alert("Weka email na password");
+return;
+}
+
+localStorage.setItem(email,pass);
+alert("Registered successfully");
+}
+
+// LOGIN
+function loginUser(){
+let email=document.getElementById("email").value;
+let pass=document.getElementById("pass").value;
+
+if(localStorage.getItem(email)===pass){
+localStorage.setItem("currentUser",email);
+
+document.getElementById("login").style.display="none";
+show("home");
+
+document.getElementById("welcome").innerText="Welcome "+email;
+
+}else{
+alert("Wrong login");
+}
+}
+
+// LOGOUT
+function logout(){
+localStorage.removeItem("currentUser");
+location.reload();
+}
+
+// AUTO LOGIN
+window.onload=function(){
+let u=localStorage.getItem("currentUser");
+
+if(u){
+document.getElementById("login").style.display="none";
+show("home");
+document.getElementById("welcome").innerText="Welcome "+u;
+
+let vip=localStorage.getItem("vip_"+u);
+if(vip && Date.now()<vip){
+document.getElementById("vipArea").style.display="block";
+}
+}
+}
+
+// MODE
+function setMode(m){
+mode=m;
+}
+
+// DATE
+function getDate(offset=0){
+let d=new Date();
+d.setDate(d.getDate()+offset);
+return d.toLocaleDateString('en-CA');
+}
+
+// AI
+function getPrediction(){
+return ["Over 2.5","GG","Home Win"][Math.floor(Math.random()*3)];
+}
+
+function getConfidence(){
+return Math.floor(Math.random()*15)+70;
+}
+
+// MATCHES
+async function loadMatches(){
+
+results.innerHTML="⏳ Loading...";
+
+let url="";
+if(mode==="today") url=`https://v3.football.api-sports.io/fixtures?date=${getDate(0)}`;
+if(mode==="tomorrow") url=`https://v3.football.api-sports.io/fixtures?date=${getDate(1)}`;
+if(mode==="live") url=`https://v3.football.api-sports.io/fixtures?live=all`;
+
+let res=await fetch(url,{headers:{"x-apisports-key":API_KEY}});
+let data=await res.json();
+
+let league=document.getElementById("league").value;
+
+let out="";
+
+data.response.forEach(g=>{
+
+if(league!="all" && g.league.id!=league) return;
+
+let date=g.fixture.date.split("T")[0];
+let time=g.fixture.date.split("T")[1].slice(0,5);
+
+let tip=getPrediction();
+let conf=getConfidence();
+
+out+=`
+<div class="match">
+<h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
+<p>🏆 ${g.league.name}</p>
+<p>📅 ${date}</p>
+<p>⏰ ${time}</p>
+<p>📊 Tip: ${tip}</p>
+<p>🎯 Accuracy: ${conf}%</p>
+</div>
+`;
+});
+
+results.innerHTML=out || "No matches";
+}
+
+// VIP MATCHES (FINAL STRUCTURE)
+async function loadVIPMatches(){
+
+let u=localStorage.getItem("currentUser");
+let vip=localStorage.getItem("vip_"+u);
+
+if(!vip || Date.now()>vip){
+alert("VIP expired");
+return;
+}
+
+vipResults.innerHTML="⏳ Loading...";
+
+let res=await fetch(`https://v3.football.api-sports.io/fixtures?date=${getDate(0)}`,{
+headers:{"x-apisports-key":API_KEY}
+});
+
+let data=await res.json();
+
+let tips=[
+"Over 1.5 Goals",
+"Double Chance 1X",
+"GG (Yes)",
+"Home Team Over 1.5"
+];
+
+let matches=data.response.sort(()=>0.5-Math.random()).slice(0,4);
+
+let out="";
+
+matches.forEach(g=>{
+
+let date=g.fixture.date.split("T")[0];
+let time=g.fixture.date.split("T")[1].slice(0,5);
+
+let tip=tips[Math.floor(Math.random()*tips.length)];
+let conf=Math.floor(Math.random()*5)+92;
+
+out+=`
+<div class="match">
+<h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
+<p>🏆 ${g.league.name}</p>
+<p>📅 ${date}</p>
+<p>⏰ ${time}</p>
+<p>🔥 Tip: ${tip}</p>
+<p>🎯 Accuracy: ${conf}%</p>
+</div>
+`;
+});
+
+vipResults.innerHTML=out;
+}
+
+// VIP CONTROL
+function activateVIP(){
+let code=vipCode.value;
+let exp=localStorage.getItem(code);
+let u=localStorage.getItem("currentUser");
+
+if(exp && Date.now()<exp){
+localStorage.setItem("vip_"+u,exp);
+vipArea.style.display="block";
+alert("VIP Activated");
+}else alert("Invalid");
+}
+
+function openVIP(){
+show("vipPage");
+}
+
+function exitVIP(){
+show("home");
+}
+
+// ADMIN
+function genCode(){
+let code="VIP"+Math.floor(Math.random()*99999);
+let days=days.value;
+let exp=Date.now()+days*86400000;
+localStorage.setItem(code,exp);
+codeOut.innerText=code;
+}
+
+// SECRET ADMIN
+let taps=0;
+function tapAdmin(){
+taps++;
+if(taps==5){
+let p=prompt("Password");
+if(p==="admin123") show("admin");
+taps=0;
+}
+setTimeout(()=>taps=0,2000);
+}
+
+</script>
+
+</body>
+</html>

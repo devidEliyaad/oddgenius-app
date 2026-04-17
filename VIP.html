@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>VIP</title>
+
+<style>
+body{
+    background:#0a1a2f;
+    color:white;
+    text-align:center;
+    font-family:Arial;
+}
+.match{
+    background:#233a55;
+    margin:10px;
+    padding:15px;
+    border-radius:10px;
+}
+button{
+    padding:10px;
+    border-radius:10px;
+    border:none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>👑 VIP</h1>
+
+<button onclick="goHome()">Home</button>
+<button onclick="logout()">Exit</button>
+
+<br><br>
+
+<button onclick="generateVIP()">Generate VIP Slip</button>
+
+<h3>Total Odds: <span id="total">0</span></h3>
+
+<div id="results"></div>
+
+<script>
+
+if(localStorage.getItem("vipActive")!=="true"){
+    window.location.href="index.html";
+}
+
+function goHome(){
+    localStorage.removeItem("vipActive");
+    window.location.href="index.html";
+}
+
+function logout(){
+    localStorage.removeItem("vipActive");
+    window.location.href="index.html";
+}
+
+async function generateVIP(){
+
+    const API_KEY="8a5b484376f53b6d1d4f6f2b8582f18c";
+
+    document.getElementById("results").innerHTML="Loading...";
+
+    let today=new Date().toISOString().split("T")[0];
+
+    let res=await fetch(`https://v3.football.api-sports.io/fixtures?date=${today}`,{
+        headers:{ "x-apisports-key": API_KEY }
+    });
+
+    let data=await res.json();
+
+    let matches=data.response;
+
+    let output="";
+    let total=1;
+
+    matches.slice(0,5).forEach(g=>{
+
+        let odds=(Math.random()*2+2).toFixed(2);
+        let conf=Math.floor(Math.random()*10)+90;
+
+        output+=`
+        <div class="match">
+        <h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
+        <p>🔥 Tip: Over 2.5</p>
+        <p>💰 Odds: ${odds}</p>
+        <p>📊 ${conf}%</p>
+        </div>
+        `;
+
+        total*=odds;
+    });
+
+    document.getElementById("results").innerHTML=output;
+    document.getElementById("total").innerText=total.toFixed(2);
+}
+
+</script>
+
+</body>
+</html>

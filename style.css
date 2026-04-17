@@ -1,0 +1,47 @@
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(#0a1a2f,#0f2d4a);
+    color:white;
+    text-align:center;
+}
+
+.nav{
+    background:#08121f;
+    padding:15px;
+}
+
+.nav button{
+    margin:5px;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    background:#00c2ff;
+    color:white;
+}
+
+.container{
+    padding:20px;
+}
+
+.card{
+    background:#1c2f45;
+    padding:20px;
+    margin:15px;
+    border-radius:15px;
+}
+
+input{
+    padding:10px;
+    border-radius:10px;
+    border:none;
+    width:80%;
+}
+
+.match{
+    background:#233a55;
+    margin:10px;
+    padding:15px;
+    border-radius:10px;
+}
+
