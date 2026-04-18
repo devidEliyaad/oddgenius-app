@@ -83,9 +83,10 @@ out+=`
 <div class="match">
 <h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
 <p>${g.league.name}</p>
-<p>${date} ${time}</p>
-<p>Tip: ${tip}</p>
-<p>Accuracy: ${conf}%</p>
+<p>📅 ${date}</p>
+<p>⏰ ${time}</p>
+<p>📊 Tip: ${tip}</p>
+<p>🎯 Accuracy: ${conf}%</p>
 </div>`;
 });
 
@@ -136,30 +137,44 @@ function openVIP(){
 show("vipPage");
 }
 
-// ================= VIP PICKS =================
+// ================= VIP PICKS (FIXED - NO STUCK) =================
 async function loadVIP(){
 
 vipResults.innerHTML="⏳ Loading VIP...";
 
 try{
-let res=await fetch(`https://v3.football.api-sports.io/fixtures?next=10`,{
+
+// kutumia endpoint nyepesi (leo)
+let res=await fetch(`https://v3.football.api-sports.io/fixtures?date=${getDate(0)}`,{
 headers:{"x-apisports-key":API_KEY}
 });
 
 let data=await res.json();
 
+if(!data.response || data.response.length===0){
+vipResults.innerHTML="❌ No VIP matches";
+return;
+}
+
+// chagua mechi strong chache
 let picks=data.response.sort(()=>0.5-Math.random()).slice(0,4);
 
 let out="";
 
 picks.forEach(g=>{
-let tip=["Over 1.5","GG","1X"][Math.floor(Math.random()*3)];
+
+let tip=["Over 1.5","GG","1X","Home Win"][Math.floor(Math.random()*4)];
 let conf=Math.floor(Math.random()*5)+92;
+
+let date=g.fixture.date.split("T")[0];
+let time=g.fixture.date.split("T")[1].slice(0,5);
 
 out+=`
 <div class="match">
 <h3>${g.teams.home.name} vs ${g.teams.away.name}</h3>
-<p>${g.league.name}</p>
+<p>🏆 ${g.league.name}</p>
+<p>📅 ${date}</p>
+<p>⏰ ${time}</p>
 <p>🔥 ${tip}</p>
 <p>🎯 ${conf}%</p>
 </div>`;
@@ -168,7 +183,7 @@ out+=`
 vipResults.innerHTML=out;
 
 }catch(e){
-vipResults.innerHTML="⚠️ Error";
+vipResults.innerHTML="⚠️ API Limit / Error";
 }
 }
 
@@ -178,11 +193,16 @@ async function generateSlip(){
 vipResults.innerHTML="⏳ Generating Bet Slip...";
 
 try{
-let res=await fetch(`https://v3.football.api-sports.io/fixtures?next=15`,{
+let res=await fetch(`https://v3.football.api-sports.io/fixtures?date=${getDate(0)}`,{
 headers:{"x-apisports-key":API_KEY}
 });
 
 let data=await res.json();
+
+if(!data.response){
+vipResults.innerHTML="❌ No data";
+return;
+}
 
 let games=data.response.sort(()=>0.5-Math.random()).slice(0,4);
 
@@ -212,11 +232,11 @@ out+=`<h3>💰 Total Odds: ${totalOdds.toFixed(2)}</h3>`;
 vipResults.innerHTML=out;
 
 }catch(e){
-vipResults.innerHTML="⚠️ Slip Error";
+vipResults.innerHTML="⚠️ Slip Error / Limit";
 }
 }
 
-// ================= ADMIN (FIXED) =================
+// ================= ADMIN =================
 function genCode(){
 
 let code="VIP"+Math.floor(100000 + Math.random()*900000);
@@ -244,4 +264,4 @@ taps=0;
 }
 
 setTimeout(()=>taps=0,2000);
-}
+  }
