@@ -166,9 +166,7 @@ results.innerHTML="❌ No matches";
 return;
 }
 
-// LIMIT (FREE)
 let matches=data.response.slice(0,8);
-
 displayMatches(matches);
 
 }catch(e){
@@ -246,7 +244,7 @@ function openVIP(){
 show("vipPage");
 }
 
-// VIP PICKS (STRONG)
+// VIP PICKS
 async function loadVIP(){
 
 vipResults.innerHTML="⏳ Loading VIP...";
@@ -278,19 +276,21 @@ out+=`
 vipResults.innerHTML=out;
 
 }catch(e){
-vipResults.innerHTML="⚠️ Error";
+vipResults.innerHTML="⚠️ Error / Limit";
 }
 }
 
-// ADMIN
+// ✅ FIXED ADMIN
 function genCode(){
 let code="VIP"+Math.floor(Math.random()*999999);
-let days=parseInt(days.value);
 
-let exp=Date.now()+days*86400000;
+// HAPA NDIPO ILIKUWA KOSA
+let selectedDays=document.getElementById("days").value;
+
+let exp=Date.now()+selectedDays*86400000;
 
 localStorage.setItem(code,exp);
-codeOut.innerText=code;
+document.getElementById("codeOut").innerText=code;
 }
 
 // SECRET ADMIN
@@ -311,4 +311,4 @@ setTimeout(()=>taps=0,2000);
 </script>
 
 </body>
-    </html>
+</html>
