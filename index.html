@@ -11,7 +11,7 @@ body{margin:0;font-family:Arial;background:#0a1a2f;color:white;text-align:center
 button{padding:10px;border:none;border-radius:10px;margin:5px;background:#00c2ff;color:white;}
 .card{background:#1c2f45;margin:15px;padding:15px;border-radius:15px;}
 .match{background:#233a55;margin:10px;padding:15px;border-radius:10px;}
-input{padding:10px;border-radius:10px;border:none;}
+input,select{padding:10px;border-radius:10px;border:none;}
 </style>
 </head>
 
@@ -24,7 +24,7 @@ input{padding:10px;border-radius:10px;border:none;}
 <button onclick="logout()">🚪 Logout</button>
 </div>
 
-<h2>⚽ OddGenius AI</h2>
+<h2 onclick="tapAdmin()">⚽ OddGenius AI</h2>
 
 <!-- LOGIN -->
 <div id="login">
@@ -47,6 +47,7 @@ input{padding:10px;border-radius:10px;border:none;}
 <h3>💰 Help</h3>
 <p>Lipa Mix: <b>0702289410 (SALEHE MGONJA)</b></p>
 <p>WhatsApp: <b>0757453979</b></p>
+
 <a href="https://wa.me/255757453979" target="_blank">
 <button>📲 WhatsApp</button>
 </a>
@@ -83,6 +84,26 @@ input{padding:10px;border-radius:10px;border:none;}
 <div id="vipResults"></div>
 </div>
 
+<!-- ADMIN -->
+<div id="admin" style="display:none">
+<div class="card">
+<h3>🔐 Admin Dashboard</h3>
+
+<select id="days">
+<option value="1">1 Day</option>
+<option value="7">1 Week</option>
+<option value="30">1 Month</option>
+</select>
+
+<br><br>
+
+<button onclick="genCode()">Generate VIP Code</button>
+
+<p id="codeOut"></p>
+
+</div>
+</div>
+
 <script>
 
 // API
@@ -90,7 +111,7 @@ const API_KEY="109d084d11d7d324358664fe158a41c9";
 
 // NAV
 function show(x){
-["home","matches","vip","vipPage"].forEach(i=>{
+["home","matches","vip","vipPage","admin"].forEach(i=>{
 document.getElementById(i).style.display="none";
 });
 document.getElementById(x).style.display="block";
@@ -131,7 +152,7 @@ vipArea.style.display="block";
 }
 }
 
-// FETCH
+// FETCH MATCHES
 async function fetchMatches(url){
 
 results.innerHTML="⏳ Loading...";
@@ -145,13 +166,13 @@ results.innerHTML="❌ No matches";
 return;
 }
 
-// 🔥 LIMIT MATCHES (MAX 8)
+// LIMIT (FREE)
 let matches=data.response.slice(0,8);
 
 displayMatches(matches);
 
 }catch(e){
-results.innerHTML="⚠️ API Error";
+results.innerHTML="⚠️ API Error / Limit";
 }
 }
 
@@ -208,7 +229,7 @@ d.setDate(d.getDate()+offset);
 return d.toLocaleDateString('en-CA');
 }
 
-// VIP SYSTEM
+// VIP
 function activateVIP(){
 let code=vipCode.value;
 let exp=localStorage.getItem(code);
@@ -225,7 +246,7 @@ function openVIP(){
 show("vipPage");
 }
 
-// VIP MATCHES (STRONG + FEW)
+// VIP PICKS (STRONG)
 async function loadVIP(){
 
 vipResults.innerHTML="⏳ Loading VIP...";
@@ -259,6 +280,32 @@ vipResults.innerHTML=out;
 }catch(e){
 vipResults.innerHTML="⚠️ Error";
 }
+}
+
+// ADMIN
+function genCode(){
+let code="VIP"+Math.floor(Math.random()*999999);
+let days=parseInt(days.value);
+
+let exp=Date.now()+days*86400000;
+
+localStorage.setItem(code,exp);
+codeOut.innerText=code;
+}
+
+// SECRET ADMIN
+let taps=0;
+
+function tapAdmin(){
+taps++;
+
+if(taps==5){
+let p=prompt("Enter Admin Password");
+if(p==="admin123") show("admin");
+taps=0;
+}
+
+setTimeout(()=>taps=0,2000);
 }
 
 </script>
