@@ -243,4 +243,19 @@ taps=0;
 }
 
 setTimeout(()=>taps=0,2000);
-    }
+function genCode(){
+
+    let code = "VIP" + Math.floor(100000 + Math.random()*900000);
+
+    let daysSelect = document.getElementById("days");
+    let daysValue = parseInt(daysSelect.value);
+
+    let exp = Date.now() + (daysValue * 86400000);
+
+    localStorage.setItem(code, exp);
+
+    let output = document.getElementById("codeOut");
+    output.innerText = "CODE: " + code;
+
+    alert("VIP Code Generated");
+}    
