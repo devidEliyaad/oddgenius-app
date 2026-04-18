@@ -58,9 +58,7 @@ results.innerHTML="❌ No matches";
 return;
 }
 
-// FREE LIMIT (usipunguze logic yako)
 let matches=data.response.slice(0,8);
-
 displayMatches(matches);
 
 }catch(e){
@@ -174,7 +172,7 @@ vipResults.innerHTML="⚠️ Error";
 }
 }
 
-// ================= 🔥 BET SLIP GENERATOR =================
+// ================= 🔥 BET SLIP =================
 async function generateSlip(){
 
 vipResults.innerHTML="⏳ Generating Bet Slip...";
@@ -218,8 +216,9 @@ vipResults.innerHTML="⚠️ Slip Error";
 }
 }
 
-// ================= ADMIN =================
+// ================= ADMIN (FIXED) =================
 function genCode(){
+
 let code="VIP"+Math.floor(100000 + Math.random()*900000);
 
 let daysValue=document.getElementById("days").value;
@@ -228,6 +227,8 @@ let exp=Date.now()+(parseInt(daysValue)*86400000);
 localStorage.setItem(code,exp);
 
 document.getElementById("codeOut").innerText="CODE: "+code;
+
+alert("VIP Code Generated");
 }
 
 // ================= SECRET ADMIN =================
@@ -243,19 +244,4 @@ taps=0;
 }
 
 setTimeout(()=>taps=0,2000);
-function genCode(){
-
-    let code = "VIP" + Math.floor(100000 + Math.random()*900000);
-
-    let daysSelect = document.getElementById("days");
-    let daysValue = parseInt(daysSelect.value);
-
-    let exp = Date.now() + (daysValue * 86400000);
-
-    localStorage.setItem(code, exp);
-
-    let output = document.getElementById("codeOut");
-    output.innerText = "CODE: " + code;
-
-    alert("VIP Code Generated");
-}    
+}
